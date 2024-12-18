@@ -1,0 +1,15 @@
+# Visual Studio geçici dosyalarý ve klasörleri
+.vs/
+*.user
+*.suo
+
+# Derleme dosyalarý
+bin/
+obj/
+
+# Yayýnlama dosyalarý
+publish/
+
+# Diðer gereksiz dosyalar
+logs/
+*.log

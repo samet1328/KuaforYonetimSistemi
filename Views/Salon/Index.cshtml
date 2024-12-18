@@ -1,0 +1,25 @@
+﻿@model IEnumerable<KuaforYonetimSistemi.Models.Salon>
+
+<div class="container">
+    <h1>Salon Listesi</h1>
+    <a asp-action="Create" class="btn btn-primary">Yeni Salon Ekle</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Adı</th>
+                <th>Adres</th>
+                <th>Çalışma Saatleri</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var salon in Model)
+            {
+                <tr>
+                    <td>@salon.Name</td>
+                    <td>@salon.Address</td>
+                    <td>@salon.WorkingHours</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
