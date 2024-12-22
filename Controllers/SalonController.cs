@@ -1,43 +1,120 @@
-﻿using Microsoft.AspNetCore.Mvc; // MVC işlemleri için gerekli namespace
-using KuaforYonetimSistemi.Models; // Proje içindeki modelleri ve veritabanı bağlamını kullanmak için gerekli
+﻿using KuaforYonetimSistemi.Data;
+using KuaforYonetimSistemi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace KuaforYonetimSistemi.Controllers
 {
-    // Kuaför salonlarını yönetmek için bir controller
+    /// <summary>
+    /// Salon CRUD (ekleme, listeleme, güncelleme, silme) işlemlerini yönetir.
+    /// Yalnızca Admin rolü erişebilmesi için [Authorize(Roles="Admin")] ekleyebilirsiniz.
+    /// </summary>
     public class SalonController : Controller
     {
-        private readonly AppDbContext _context;
+        private readonly KuaforContext _context;
 
-        // Constructor ile veritabanı bağlamını (DbContext) alıyoruz
-        public SalonController(AppDbContext context)
+        public SalonController(KuaforContext context)
         {
             _context = context;
         }
 
-        // Salonların listelendiği action
-        public IActionResult Index()
+        // GET: /Salon/Index
+        public async Task<IActionResult> Index()
         {
-            var salons = _context.Salons.ToList(); // Tüm salonları veritabanından al
-            return View(salons); // View'e salon listesini gönder
+            // Tüm salonları liste halinde veritabanından çekerek View'e gönderiyoruz
+            var salons = await _context.Salons.ToListAsync();
+            return View(salons);
         }
 
-        // Yeni bir salon oluşturma formunu gösteren action
+        // GET: /Salon/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            // ID değerine göre salona ait bilgileri (hizmetler, çalışanlar vb.) çekiyoruz
+            var salon = await _context.Salons
+                .Include(s => s.Services)
+                .Include(s => s.Employees)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (salon == null)
+                return NotFound();
+
+            return View(salon);
+        }
+
+        // GET: /Salon/Create
         public IActionResult Create()
         {
-            return View(); // Sadece View'i döndürür (kullanıcıya form gösterilir)
+            // Yeni salon ekleme formu
+            return View();
         }
 
-        // Yeni bir salon kaydeden action (POST)
+        // POST: /Salon/Create
         [HttpPost]
-        public IActionResult Create(Salon salon)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(Salon salon)
         {
             if (ModelState.IsValid)
             {
-                _context.Salons.Add(salon); // Yeni salonu veritabanına ekle
-                _context.SaveChanges(); // Değişiklikleri kaydet
-                return RedirectToAction("Index"); // Salon listesine yönlendir
+                // Formdan gelen salon verilerini veritabanına ekliyoruz
+                _context.Salons.Add(salon);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            return View(salon); // Eğer doğrulama başarısızsa formu tekrar göster
+            return View(salon);
+        }
+
+        // GET: /Salon/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            var salon = await _context.Salons.FindAsync(id);
+            if (salon == null)
+                return NotFound();
+
+            return View(salon);
+        }
+
+        // POST: /Salon/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Salon salon)
+        {
+            if (id != salon.Id)
+                return BadRequest();
+
+            if (ModelState.IsValid)
+            {
+                // Salon bilgilerini güncelliyoruz
+                _context.Salons.Update(salon);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(salon);
+        }
+
+        // GET: /Salon/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            var salon = await _context.Salons.FindAsync(id);
+            if (salon == null)
+                return NotFound();
+
+            return View(salon);
+        }
+
+        // POST: /Salon/DeleteConfirmed/5
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var salon = await _context.Salons.FindAsync(id);
+            if (salon != null)
+            {
+                _context.Salons.Remove(salon);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿nausing System;
+﻿using System;
 
 namespace KuaforYonetimSistemi.Models
 {
