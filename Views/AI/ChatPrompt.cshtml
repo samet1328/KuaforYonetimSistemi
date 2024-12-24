@@ -1,0 +1,12 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Saç Stili Önerisi Al";
+}
+<h2>Saç Stili Önerisi Al (ChatGPT)</h2>
+<form method="post" asp-action="ChatPrompt">
+    <div class="form-group">
+        <label for="userPrompt">Sorunuz/Talebiniz:</label>
+        <textarea id="userPrompt" name="userPrompt" rows="4" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Gönder</button>
+</form>
